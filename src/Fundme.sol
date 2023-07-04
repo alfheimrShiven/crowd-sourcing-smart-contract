@@ -13,7 +13,7 @@ contract FundMe {
     address[] public s_funders;
 
     // Could we make this constant?  /* hint: no! We should make it immutable! This is because, i_owner value will be know during run time and not at compile time. Eg: smart contract addresses */
-    address public immutable i_owner;
+    address private immutable i_owner;
     AggregatorV3Interface private s_priceFeed;
     uint256 public constant MINIMUM_USD = 5e18; // 5 * 10 ** 18;
 
@@ -94,6 +94,10 @@ contract FundMe {
         address fundingAddress
     ) public view returns (uint256) {
         return s_addressToAmountFunded[fundingAddress];
+    }
+
+    function getOwner() public view returns (address) {
+        return i_owner;
     }
 }
 

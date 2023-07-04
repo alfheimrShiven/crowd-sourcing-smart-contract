@@ -29,7 +29,7 @@ contract FundMeTest is Test {
     }
 
     function testOwnerIsMsgSender() public {
-        assertEq(fundMe.i_owner(), msg.sender); // the FundMeTest contract is deploying the FundMe.sol contract as it's a script
+        assertEq(fundMe.getOwner(), msg.sender); // the FundMeTest contract is deploying the FundMe.sol contract as it's a script
     }
 
     function testPriceFeedVersionIsAccurate() public {
@@ -56,5 +56,51 @@ contract FundMeTest is Test {
         vm.prank(USER);
         vm.expectRevert();
         fundMe.withdraw();
+    }
+
+    function testWithdrawAfterASingleFunder() public funded {
+        // Step 1: Arrange
+        uint256 startingFundMeBalance = address(fundMe).balance;
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+
+        // Act
+        vm.prank(fundMe.getOwner());
+        fundMe.withdraw();
+
+        // Assert
+        uint256 endingFundMeBalance = address(fundMe).balance;
+        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        assertEq(endingFundMeBalance, 0);
+        assertEq(
+            (startingOwnerBalance + startingFundMeBalance),
+            endingOwnerBalance
+        );
+    }
+
+    function testWithdrawAfterMultipleFunders() public {
+        // Step 1: Arrange
+        uint160 firstFunderIndex = 1; // address(1) is stable as compared to address(0)
+        uint160 lastFunderIndex = 10;
+
+        for (uint160 i = firstFunderIndex; i < lastFunderIndex; i++) {
+            hoax(address(i), SEND_VALUE);
+            fundMe.fund{value: SEND_VALUE}();
+        }
+
+        uint256 startingFundMeBalance = address(fundMe).balance;
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+
+        // Act
+        vm.prank(fundMe.getOwner());
+        fundMe.withdraw();
+
+        // Assert
+        uint256 endingFundMeBalance = address(fundMe).balance;
+        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        assertEq(endingFundMeBalance, 0);
+        assertEq(
+            (startingOwnerBalance + startingFundMeBalance),
+            endingOwnerBalance
+        );
     }
 }
