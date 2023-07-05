@@ -92,11 +92,38 @@ contract FundMeTest is Test {
 
         // Act
         vm.prank(fundMe.getOwner());
-        fundMe.withdraw();
+        fundMe.withdraw(); // gas charged
 
         // Assert
         uint256 endingFundMeBalance = address(fundMe).balance;
-        uint256 endingOwnerBalance = fundMe.getOwner().balance;
+        uint256 endingOwnerBalance = fundMe.getOwner().balance; // this would be lesser as gas would be charge on withdraw
+        assertEq(endingFundMeBalance, 0);
+        assertEq(
+            (startingOwnerBalance + startingFundMeBalance),
+            endingOwnerBalance
+        );
+    }
+
+    function testWithdrawAfterMultipleFundersCheaper() public {
+        // Step 1: Arrange
+        uint160 firstFunderIndex = 1; // address(1) is stable as compared to address(0)
+        uint160 lastFunderIndex = 10;
+
+        for (uint160 i = firstFunderIndex; i < lastFunderIndex; i++) {
+            hoax(address(i), SEND_VALUE);
+            fundMe.fund{value: SEND_VALUE}();
+        }
+
+        uint256 startingFundMeBalance = address(fundMe).balance;
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+
+        // Act
+        vm.prank(fundMe.getOwner());
+        fundMe.cheaperWithdraw(); // gas charged
+
+        // Assert
+        uint256 endingFundMeBalance = address(fundMe).balance;
+        uint256 endingOwnerBalance = fundMe.getOwner().balance; // this would be lesser as gas would be charge on withdraw
         assertEq(endingFundMeBalance, 0);
         assertEq(
             (startingOwnerBalance + startingFundMeBalance),

@@ -51,14 +51,36 @@ contract FundMe {
             s_addressToAmountFunded[funder] = 0;
         }
         s_funders = new address[](0);
-        // // transfer
+        // Option 1: transfer
         // payable(msg.sender).transfer(address(this).balance);
 
-        // // send
+        // Option 2: send
         // bool sendSuccess = payable(msg.sender).send(address(this).balance);
         // require(sendSuccess, "Send failed");
 
-        // call
+        // Option 3: call
+        (bool callSuccess, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
+        require(callSuccess, "Call failed");
+    }
+
+    function cheaperWithdraw() public onlyOwner {
+        // replication of withdraw() with less reading from storage and more from function memory. This will reduce gas usage.
+        address[] memory funders = s_funders;
+        // s_addressToAmountFunded cannot be stored in memory as its a mapping!
+        uint256 fundersLength = funders.length;
+
+        for (
+            uint256 funderIndex = 0;
+            funderIndex < fundersLength;
+            funderIndex++
+        ) {
+            address funder = funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
+        }
+        s_funders = new address[](0);
+
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
