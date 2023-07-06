@@ -3,7 +3,7 @@
 pragma solidity ^0.8.18;
 
 import {Script, console} from "forge-std/Script.sol";
-import {DevOpsTool} from "lib/foundry-devops/src/DevOpsTools.sol";
+import {DevOpsTools} from "lib/foundry-devops/src/DevOpsTools.sol";
 import {FundMe} from "src/Fundme.sol";
 
 contract FundFundMe is Script {
@@ -18,11 +18,30 @@ contract FundFundMe is Script {
 
     function run() public {
         // find the latest deployed address of FundMe contract
-        address mostRecentlyDeployed = DevOpsTool.get_most_recent_deployment(
+        address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
             "FundMe",
-            block.chainId
+            block.chainid
         );
         // fund it
         fundFundMe(mostRecentlyDeployed);
+    }
+}
+
+contract WithdrawFundMe is Script {
+    function withdrawFundMe(address mostRecentlyDeployed) public {
+        vm.startBroadcast();
+        FundMe(payable(mostRecentlyDeployed)).withdraw();
+        vm.stopBroadcast();
+        console.log("Withdrew FundMe contract");
+    }
+
+    function run() public {
+        // find the latest deployed address of FundMe contract
+        address mostRecentlyDeployed = DevOpsTools.get_most_recent_deployment(
+            "FundMe",
+            block.chainid
+        );
+        // withdraw it
+        withdrawFundMe(mostRecentlyDeployed);
     }
 }
