@@ -24,8 +24,6 @@ contract InteractionsTest is Test {
         fundFundMe.fundFundMe(address(fundMe));
 
         WithdrawFundMe withdrawFundMe = new WithdrawFundMe();
-        // vm.prank(USER); // introducing other user hence test should fail
-        // vm.deal(USER, STARTING_BALANCE);
         withdrawFundMe.withdrawFundMe(address(fundMe));
 
         assertEq(address(fundMe).balance, 0);

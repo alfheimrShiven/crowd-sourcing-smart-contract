@@ -56,19 +56,23 @@ Optionally, add your `ETHERSCAN_API_KEY` if you want to verify your contract on 
 
 Head over to [faucets.chain.link](https://faucets.chain.link/) and get some testnet ETH. You should see the ETH show up in your metamask.
 
-### 3. Deploy 
+### 3. Deploy using Makefile cmd
 
 #### TestNet deployment:
 
 ```
-forge script script/DeployFundMe.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+make deploy ARGS="--network sepolia"
 ```
+# Scripts using Makefile cmds
 
+### Fund
+```
+make fund ARGS="--network sepolia"
+```
 
 ### Withdraw
-
 ```
-cast send <FUNDME_CONTRACT_ADDRESS> "withdraw()"  --private-key <PRIVATE_KEY>
+make withdraw ARGS="--network sepolia"
 ```
 
 ### Estimate gas
